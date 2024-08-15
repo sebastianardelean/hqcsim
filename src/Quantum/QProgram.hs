@@ -1,4 +1,11 @@
-
+{-|
+ -Module      : QProgram
+ -Description : Definitions of qprogram datatypes and of simulation function.
+ -Copyright   : (c) Mihai Sebastian Ardelean, 2024
+ -License     : BSD3
+ -Maintainer  : ardeleanasm@gmail.com
+ -Portability : POSIX
+ -}
 module Quantum.QProgram
   (
     runQProg
@@ -19,24 +26,43 @@ import qualified Numeric.LinearAlgebra as LA
 
 import Control.Monad (replicateM)
 
+{-|
+A `Machine` is defined by the quantum state and the measurement register.
 
+It has two fields:
+* `qstate` of type `State`
+* `measurementRegister` of type `Int`
+-}
 data Machine = Machine {
-    qstate :: State
-  , measurementRegister :: Int
+    qstate :: State            -- ^ Quantum state.
+  , measurementRegister :: Int -- ^ Measurement register.
   } deriving (Eq, Show)
 
 
+{-|
+A `QInstruction` is defined by the unitary transformation and by the
+qubits' index on which the transformation is applied.
 
+It has two fields:
+* `gateMatrix` of type `Gate` is the unitary matrix that defines the quantum gate.
+* `affectedQubits` of type `[Int]`
+-}
 data QInstruction = QInstruction {
-    gateMatrix ::Gate
-  , affectedQubits :: [Int]
+    gateMatrix ::Gate       -- ^ Quantum gate matrix.
+  , affectedQubits :: [Int] -- ^ List of qubits' index that are affected by the quantum gate.
     } deriving (Eq,Show)
 
+{-|
+A `QProgram` is defined by the list quantum instructions:
+* `instructions` is of type `[QInstruction]`
+-}
 data QProgram = QProgram {
-  instructions :: [QInstruction]
+  instructions :: [QInstruction] -- ^ List of program instructions.
                    } deriving (Eq, Show)
 
-
+{-|
+ - makeQuantumState function initializes a quantum state of `n` qubits
+-}
 makeQuantumState :: Int -> State
 makeQuantumState n = LA.fromList $ 1 : replicate (2 ^ n - 1) 0
 
@@ -165,7 +191,9 @@ evolveState (QInstruction gateMatrix affectedQubits) m = newMachine
     newState = applyGate (qstate m) gateMatrix affectedQubits
     newMachine = Machine newState (measurementRegister m)
 
-
+{-|
+ - runQProg function executes the program's instruction.
+-}
 runQProg :: QProgram -> Machine -> IO Machine
 runQProg qprog machine = runInstruction (instructions qprog) machine
   where
