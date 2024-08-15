@@ -1,6 +1,11 @@
 
 module Quantum.QProgram
   (
+    runQProg
+  , makeQuantumState
+  , Machine(..)
+  , QInstruction(..)
+  , QProgram(..)
   ) where
 
 import Quantum.QDataTypes
@@ -45,17 +50,15 @@ apply = (LA.#>)
 compose :: Gate -> Gate -> Gate
 compose = (LA.<>)
 
-
-
 kroneckerMul :: Gate -> Gate -> Gate
 kroneckerMul a b = LA.kronecker a b
-
 
 kroneckerExp :: Gate -> Int -> Gate
 kroneckerExp gate n
   | n < 1 = (1LA.><1) [1]::Gate
   | n == 1 = gate
   | otherwise = kroneckerMul (kroneckerExp gate (n - 1)) gate
+
 
 lift :: Gate -> Int -> Int -> Gate
 lift gate i n = liftResult
